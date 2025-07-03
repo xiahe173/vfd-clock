@@ -15,6 +15,10 @@ public:
     void printCode(uint8_t position, uint8_t code);
     void printBits(uint8_t position, const uint8_t bits[5]);
 
+    void clearDisplay();
+    void printString(const char *str);
+    void printString(const char *str, uint8_t startPos, uint8_t endPos);
+
 private:
     uint8_t _rstPin, _csPin;
     void sendDataBatch(uint8_t command, uint8_t data);

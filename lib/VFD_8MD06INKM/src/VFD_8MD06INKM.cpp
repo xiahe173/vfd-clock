@@ -74,6 +74,30 @@ void VFD_8MD06INKM::printBits(uint8_t position, const uint8_t bits[5])
     printCode(position, position);
 }
 
+void VFD_8MD06INKM::clearDisplay()
+{
+    for (uint8_t i = 0; i < 8; ++i)
+    {
+        printCode(i, 0x00);
+    }
+}
+
+void VFD_8MD06INKM::printString(const char *str)
+{
+    for (uint8_t i = 0; i < 8 && str[i] != '\0'; ++i)
+    {
+        printChar(i, str[i]);
+    }
+}
+
+void VFD_8MD06INKM::printString(const char *str, uint8_t startPos, uint8_t endPos)
+{
+    for (uint8_t i = startPos; i <= endPos && str[i - startPos] != '\0'; ++i)
+    {
+        printChar(i, str[i - startPos]);
+    }
+}
+
 void VFD_8MD06INKM::writeCustomizeToRam(uint8_t position, const uint8_t data[5])
 {
     digitalWrite(_csPin, LOW);

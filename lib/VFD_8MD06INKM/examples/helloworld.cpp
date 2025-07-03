@@ -13,11 +13,7 @@ void setup()
     vfd.setBrightness(128); // Set brightness to 128 (0-255)
 
     // print some characters
-    vfd.printChar(0, 'H');
-    vfd.printChar(1, 'e');
-    vfd.printChar(2, 'l');
-    vfd.printChar(3, 'l');
-    vfd.printChar(4, 'o');
+    vfd.printString("Hello");
     vfd.printChar(5, '!');
 
     // create a custom character
