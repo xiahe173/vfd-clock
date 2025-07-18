@@ -60,7 +60,10 @@ void SD3078::setTime(uint8_t year, uint8_t mon, uint8_t day, uint8_t week,
                      bool tf12or24, uint8_t amOrpm)
 {
     if (!tf12or24 && (hour == 0 || hour > 12))
+    {
+        Serial.println("Invalid hour for 12-hour format. Hour must be between 1 and 12.");
         return;
+    }
 
     uint8_t buf[7] = {
         (uint8_t)(((sec / 10) << 4) | (sec % 10)),

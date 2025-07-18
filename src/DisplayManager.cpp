@@ -6,10 +6,10 @@ void DisplayManager::begin()
 {
     vfd.hardReset();
     vfd.begin();
-    vfd.setBrightness(current_brightness);
+    vfd.setBrightness(currentBrightness);
 }
 
-void DisplayManager::showText(const String &text)
+void DisplayManager::setText(const String &text)
 {
     updateDisplay(text);
 }
@@ -20,30 +20,40 @@ void DisplayManager::setBrightness(uint8_t brightness)
         brightness = 255;
     else if (brightness < 0)
         brightness = 0;
-    if (brightness != current_brightness)
+    if (brightness != currentBrightness)
     {
-        current_brightness = brightness;
-        vfd.setBrightness(current_brightness);
+        currentBrightness = brightness;
+        vfd.setBrightness(currentBrightness);
     }
+}
+
+void DisplayManager::setAlert(const String &text, uint16_t duration)
+{
+    // TODO
+}
+
+void DisplayManager::show()
+{
+    // TODO
 }
 
 void DisplayManager::stepBrightness(bool increase, uint8_t increment)
 {
     if (increase)
     {
-        if (current_brightness + increment <= 255)
+        if (currentBrightness + increment <= 255)
         {
-            current_brightness += increment;
+            currentBrightness += increment;
         }
     }
     else
     {
-        if (current_brightness >= increment)
+        if (currentBrightness >= increment)
         {
-            current_brightness -= increment;
+            currentBrightness -= increment;
         }
     }
-    vfd.setBrightness(current_brightness);
+    vfd.setBrightness(currentBrightness);
 }
 
 void DisplayManager::updateDisplay(const String &text)

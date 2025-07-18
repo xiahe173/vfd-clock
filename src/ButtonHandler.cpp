@@ -125,6 +125,7 @@ bool ButtonHandler::wasLongPressed(uint8_t index)
     if (longPressFlag[index])
     {
         longPressFlag[index] = false;
+        noTone(BUZZER_PIN);
         return true;
     }
     return false;
