@@ -127,7 +127,7 @@ void loop()
                 }
                 else if (newTime != oldTime)
                 {
-                    displayManager.setTextScroll(oldTime, newTime);
+                    displayManager.setTextScroll(oldTime, newTime, ScrollDirection::Up, Easing::EaseInOut);
                 }
             }
             displayManager.updateAnimation();

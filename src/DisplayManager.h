@@ -2,13 +2,18 @@
 #include <Arduino.h>
 #include <VFD_8MD06INKM.h>
 
+enum class ScrollDirection { Up, Down };
+enum class Easing { Linear, EaseInOut };
+
 class DisplayManager
 {
 public:
     DisplayManager(uint8_t rstPin, uint8_t csPin);
     void begin();
     void setText(const String &text);
-    void setTextScroll(const String &startText, const String &endText);
+    void setTextScroll(const String &startText, const String &endText,
+                       ScrollDirection direction = ScrollDirection::Up,
+                       Easing easing = Easing::Linear);
     void cancelAnimation();
     void updateAnimation();
     bool isAnimationActive() const { return scrollActive; }
@@ -33,7 +38,6 @@ private:
 
     // Scroll animation state
     static const uint8_t SCROLL_FRAMES = 8;
-    static const uint16_t SCROLL_FRAME_MS = 50;
 
     bool scrollActive = false;
     uint8_t scrollFrame = 0;
@@ -43,6 +47,12 @@ private:
     uint8_t scrollOldFont[8][5];
     uint8_t scrollNewFont[8][5];
 
+    ScrollDirection scrollDirection = ScrollDirection::Up;
+    uint8_t scrollDelays[8];
+
     void loadFontData(uint8_t dest[5], char c);
-    void startScroll(const String &startText, const String &endText);
+    void startScroll(const String &startText, const String &endText,
+                     ScrollDirection direction, Easing easing);
+    void setEasingDelays(Easing easing);
+    void renderScrollFrame(uint8_t f);
 };

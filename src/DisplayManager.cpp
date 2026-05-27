@@ -62,7 +62,6 @@ void DisplayManager::updateDisplay(const String &text)
 {
     if (text != lastDisplayed)
     {
-        // if length is less than 8, pad with spaces
         String paddedText = text;
         while (paddedText.length() < 8)
         {
@@ -85,9 +84,65 @@ void DisplayManager::loadFontData(uint8_t dest[5], char c)
     memcpy(dest, data, 5);
 }
 
-void DisplayManager::startScroll(const String &startText, const String &endText)
+void DisplayManager::setEasingDelays(Easing easing)
+{
+    static const uint8_t delaysLinear[8] = {50, 50, 50, 50, 50, 50, 50, 50};
+    static const uint8_t delaysEaseInOut[8] = {75, 55, 40, 30, 30, 40, 55, 75};
+
+    const uint8_t *src = (easing == Easing::Linear) ? delaysLinear : delaysEaseInOut;
+    memcpy(scrollDelays, src, 8);
+}
+
+void DisplayManager::renderScrollFrame(uint8_t f)
+{
+    uint8_t maskOld, maskNew;
+
+    if (scrollDirection == ScrollDirection::Up)
+    {
+        maskOld = (1 << (7 - f)) - 1;
+        maskNew = ~maskOld & 0x7F;
+
+        for (uint8_t pos = 0; pos < 8; pos++)
+        {
+            if (!scrollPositions[pos])
+                continue;
+
+            uint8_t frameBits[5];
+            for (uint8_t col = 0; col < 5; col++)
+            {
+                frameBits[col] = ((scrollOldFont[pos][col] >> f) & maskOld)
+                               | ((scrollNewFont[pos][col] << (7 - f)) & maskNew);
+            }
+            vfd.printBits(pos, frameBits);
+        }
+    }
+    else
+    {
+        maskNew = (1 << f) - 1;
+        maskOld = ~maskNew & 0x7F;
+
+        for (uint8_t pos = 0; pos < 8; pos++)
+        {
+            if (!scrollPositions[pos])
+                continue;
+
+            uint8_t frameBits[5];
+            for (uint8_t col = 0; col < 5; col++)
+            {
+                frameBits[col] = ((scrollOldFont[pos][col] << f) & maskOld)
+                               | (scrollNewFont[pos][col] & maskNew);
+            }
+            vfd.printBits(pos, frameBits);
+        }
+    }
+}
+
+void DisplayManager::startScroll(const String &startText, const String &endText,
+                                 ScrollDirection direction, Easing easing)
 {
     scrollEndText = endText;
+    scrollDirection = direction;
+    setEasingDelays(easing);
 
     String paddedStart = startText;
     String paddedEnd = endText;
@@ -112,17 +167,11 @@ void DisplayManager::startScroll(const String &startText, const String &endText)
     scrollLastTime = millis();
     scrollActive = true;
 
-    // Render frame 0 (all old text) for seamless transition from ROM chars
-    for (uint8_t pos = 0; pos < 8; pos++)
-    {
-        if (scrollPositions[pos])
-        {
-            vfd.printBits(pos, scrollOldFont[pos]);
-        }
-    }
+    renderScrollFrame(0);
 }
 
-void DisplayManager::setTextScroll(const String &startText, const String &endText)
+void DisplayManager::setTextScroll(const String &startText, const String &endText,
+                                   ScrollDirection direction, Easing easing)
 {
     if (startText == endText)
     {
@@ -130,7 +179,7 @@ void DisplayManager::setTextScroll(const String &startText, const String &endTex
         return;
     }
 
-    startScroll(startText, endText);
+    startScroll(startText, endText, direction, easing);
 }
 
 void DisplayManager::updateAnimation()
@@ -139,7 +188,7 @@ void DisplayManager::updateAnimation()
         return;
 
     uint32_t now = millis();
-    if (now - scrollLastTime < SCROLL_FRAME_MS)
+    if (now - scrollLastTime < scrollDelays[scrollFrame])
         return;
 
     scrollFrame++;
@@ -152,21 +201,5 @@ void DisplayManager::updateAnimation()
         return;
     }
 
-    uint8_t f = scrollFrame;
-    uint8_t maskNew = ~((1 << (7 - f)) - 1) & 0x7F;
-    uint8_t maskOld = (1 << (7 - f)) - 1;
-
-    for (uint8_t pos = 0; pos < 8; pos++)
-    {
-        if (!scrollPositions[pos])
-            continue;
-
-        uint8_t frameBits[5];
-        for (uint8_t col = 0; col < 5; col++)
-        {
-            frameBits[col] = ((scrollOldFont[pos][col] >> f) & maskOld)
-                           | ((scrollNewFont[pos][col] << (7 - f)) & maskNew);
-        }
-        vfd.printBits(pos, frameBits);
-    }
+    renderScrollFrame(scrollFrame);
 }
