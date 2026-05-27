@@ -165,7 +165,7 @@ void DisplayManager::renderScrollFrame(uint8_t f)
             for (uint8_t col = 0; col < 5; col++)
             {
                 frameBits[col] = ((scrollOldFont[pos][col] << f) & maskOld)
-                               | (scrollNewFont[pos][col] & maskNew);
+                                | ((scrollNewFont[pos][col] >> (7 - f)) & maskNew);
             }
             vfd.printBits(pos, frameBits);
         }

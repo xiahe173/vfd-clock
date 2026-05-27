@@ -85,6 +85,24 @@ void loop()
     if (buttonHandler.wasShortPressed(0))
     {
         modeManager.nextMode();
+        
+        String modeAlert;
+        switch (modeManager.getCurrentMode())
+        {
+        case Mode::Standalone:
+            modeAlert = " Clock  ";
+            break;
+        case Mode::Serial:
+            modeAlert = " Serial ";
+            break;
+        case Mode::AIDA64:
+            modeAlert = "AIDA64  ";
+            break;
+        default:
+            modeAlert = "        ";
+            break;
+        }
+        displayManager.setAlert(modeAlert, 1500);
     }
 
     if (buttonHandler.wasShortPressed(2))
@@ -129,7 +147,7 @@ void loop()
                 }
                 else if (newTime != oldTime)
                 {
-                    displayManager.setTextScroll(oldTime, newTime);
+                    displayManager.setTextScroll(oldTime, newTime, ScrollDirection::Up, Easing::EaseInOut);
                 }
             }
         }
