@@ -18,7 +18,7 @@ public:
     void updateAnimation();
     bool isAnimationActive() const { return scrollActive; }
     String getLastDisplayedText() const { return lastDisplayed; }
-    void setAlert(const String &text, uint16_t duration = 800); // TODO
+    void setAlert(const String &text, uint16_t duration = 800);
     void show();
 
     void setBrightness(uint8_t brightness);
@@ -31,10 +31,6 @@ private:
     void updateDisplay(const String &text);
 
     uint8_t currentBrightness = 128;
-
-    bool alertFlag = false;
-    uint32_t alertStartTime = 0;
-    char alertText[9] = {0};
 
     // Scroll animation state
     static const uint8_t SCROLL_FRAMES = 8;
@@ -49,6 +45,15 @@ private:
 
     ScrollDirection scrollDirection = ScrollDirection::Up;
     uint8_t scrollDelays[8];
+
+    // Alert state
+    bool alertActive = false;
+    uint32_t alertEndTime = 0;
+    uint16_t alertDuration = 0;
+    String alertDisplayText;
+    String bufferedText;
+    bool alertEntryActive = false;
+    bool alertExitActive = false;
 
     void loadFontData(uint8_t dest[5], char c);
     void startScroll(const String &startText, const String &endText,

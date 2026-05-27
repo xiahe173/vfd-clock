@@ -112,6 +112,8 @@ void loop()
         ESP.restart();
     }
 
+    displayManager.updateAnimation();
+
     switch (modeManager.getCurrentMode())
     {
     case Mode::Standalone:
@@ -127,10 +129,9 @@ void loop()
                 }
                 else if (newTime != oldTime)
                 {
-                    displayManager.setTextScroll(oldTime, newTime, ScrollDirection::Up, Easing::EaseInOut);
+                    displayManager.setTextScroll(oldTime, newTime);
                 }
             }
-            displayManager.updateAnimation();
         }
         break;
     case Mode::Serial:

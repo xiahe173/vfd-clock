@@ -12,8 +12,29 @@ void DisplayManager::begin()
 
 void DisplayManager::setText(const String &text)
 {
+    if (alertActive)
+    {
+        bufferedText = text;
+        return;
+    }
     cancelAnimation();
     updateDisplay(text);
+}
+
+void DisplayManager::setTextScroll(const String &startText, const String &endText,
+                                   ScrollDirection direction, Easing easing)
+{
+    if (alertActive)
+    {
+        bufferedText = endText;
+        return;
+    }
+    if (startText == endText)
+    {
+        updateDisplay(endText);
+        return;
+    }
+    startScroll(startText, endText, direction, easing);
 }
 
 void DisplayManager::setBrightness(uint8_t brightness)
@@ -31,7 +52,21 @@ void DisplayManager::setBrightness(uint8_t brightness)
 
 void DisplayManager::setAlert(const String &text, uint16_t duration)
 {
-    // TODO
+    cancelAnimation();
+
+    if (!alertActive)
+    {
+        bufferedText = lastDisplayed;
+    }
+
+    alertDisplayText = text;
+    alertDuration = duration;
+    alertActive = true;
+    alertEntryActive = true;
+    alertExitActive = false;
+    alertEndTime = 0;
+
+    startScroll(lastDisplayed, alertDisplayText, ScrollDirection::Up, Easing::Linear);
 }
 
 void DisplayManager::show()
@@ -170,22 +205,19 @@ void DisplayManager::startScroll(const String &startText, const String &endText,
     renderScrollFrame(0);
 }
 
-void DisplayManager::setTextScroll(const String &startText, const String &endText,
-                                   ScrollDirection direction, Easing easing)
-{
-    if (startText == endText)
-    {
-        updateDisplay(endText);
-        return;
-    }
-
-    startScroll(startText, endText, direction, easing);
-}
-
 void DisplayManager::updateAnimation()
 {
     if (!scrollActive)
+    {
+        if (alertActive && !alertExitActive && alertEndTime > 0
+            && millis() >= alertEndTime)
+        {
+            alertExitActive = true;
+            String target = bufferedText.length() > 0 ? bufferedText : lastDisplayed;
+            startScroll(alertDisplayText, target, ScrollDirection::Down, Easing::Linear);
+        }
         return;
+    }
 
     uint32_t now = millis();
     if (now - scrollLastTime < scrollDelays[scrollFrame])
@@ -197,6 +229,18 @@ void DisplayManager::updateAnimation()
     if (scrollFrame >= SCROLL_FRAMES)
     {
         scrollActive = false;
+
+        if (alertEntryActive)
+        {
+            alertEntryActive = false;
+            alertEndTime = millis() + alertDuration;
+        }
+        else if (alertExitActive)
+        {
+            alertExitActive = false;
+            alertActive = false;
+        }
+
         updateDisplay(scrollEndText);
         return;
     }

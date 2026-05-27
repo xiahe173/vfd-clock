@@ -32,5 +32,9 @@ void SerialManager::update()
 
 String SerialManager::getLatestData()
 {
+    if (strlen(latestData) == 0)
+    {
+        return String("  ----  ");
+    }
     return String(latestData);
 }
