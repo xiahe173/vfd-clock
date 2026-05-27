@@ -116,7 +116,22 @@ void loop()
     {
     case Mode::Standalone:
         rtcManager.update(WiFi.status() == WL_CONNECTED);
-        displayManager.setText(rtcManager.getTimeString());
+        {
+            String newTime = rtcManager.getTimeString();
+            if (!displayManager.isAnimationActive())
+            {
+                String oldTime = displayManager.getLastDisplayedText();
+                if (oldTime.length() == 0)
+                {
+                    displayManager.setText(newTime);
+                }
+                else if (newTime != oldTime)
+                {
+                    displayManager.setTextScroll(oldTime, newTime);
+                }
+            }
+            displayManager.updateAnimation();
+        }
         break;
     case Mode::Serial:
         serialManager.update();
