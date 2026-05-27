@@ -15,6 +15,11 @@
 
 #define PCF_ADDRESS 0x20
 
+#define BTN_MODE 0
+#define BTN_NTP_SYNC 1
+#define BTN_BRIGHTNESS_UP 2
+#define BTN_BRIGHTNESS_DOWN 3
+
 #endif
 
 #ifdef VFD_HW_VER_0_3
@@ -28,5 +33,10 @@
 #define F_EN_PIN P2
 
 #define PCF_ADDRESS 0x20
+
+#define BTN_MODE 3
+#define BTN_NTP_SYNC 2
+#define BTN_BRIGHTNESS_UP 0
+#define BTN_BRIGHTNESS_DOWN 1
 
 #endif

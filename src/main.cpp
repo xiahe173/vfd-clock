@@ -82,7 +82,7 @@ void loop()
     pcfHandler.update();
     buttonHandler.update();
 
-    if (buttonHandler.wasShortPressed(0))
+    if (buttonHandler.wasShortPressed(BTN_MODE))
     {
         modeManager.nextMode();
 
@@ -110,26 +110,26 @@ void loop()
         displayManager.setAlert(modeAlert, 1500);
     }
 
-    if (buttonHandler.wasShortPressed(2))
+    if (buttonHandler.wasShortPressed(BTN_BRIGHTNESS_UP))
     {
         displayManager.stepBrightness(true);
     }
-    if (buttonHandler.wasShortPressed(3))
+    if (buttonHandler.wasShortPressed(BTN_BRIGHTNESS_DOWN))
     {
         displayManager.stepBrightness(false);
     }
-    if (buttonHandler.wasLongPressed(0))
+    if (buttonHandler.wasLongPressed(BTN_MODE))
     {
         ESP.restart();
     }
-    if (buttonHandler.wasLongPressed(1))
+    if (buttonHandler.wasLongPressed(BTN_NTP_SYNC))
     {
         if (WiFi.status() == WL_CONNECTED)
         {
             rtcManager.syncWithNTP();
         }
     }
-    if (buttonHandler.wasLongPressed(2))
+    if (buttonHandler.wasLongPressed(BTN_BRIGHTNESS_UP))
     {
         wm.erase();
         ESP.restart();
