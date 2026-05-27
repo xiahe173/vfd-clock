@@ -4,9 +4,17 @@
 void SerialManager::begin(unsigned long baud)
 {
     Serial.begin(baud);
-    bufferIndex = 0;
-    buffer[0] = '\0';
-    latestData[0] = '\0';
+    clear();
+}
+
+void SerialManager::clear()
+{
+    inputIndex = 0;
+    inputBuffer[0] = '\0';
+    displayBuffer[0] = '\0';
+
+    while (Serial.available())
+        Serial.read();
 }
 
 void SerialManager::update()
@@ -14,27 +22,49 @@ void SerialManager::update()
     while (Serial.available())
     {
         char c = Serial.read();
+
         if (c == '\n')
         {
-            buffer[bufferIndex] = '\0';
-            strcpy(latestData, buffer);
-            bufferIndex = 0;
-            buffer[0] = '\0';
+            finalizeLine();
         }
-        else if (bufferIndex < 8)
+        else if (c != '\r')
         {
-            // ensure buffer do not overflow when no \n is received
-            buffer[bufferIndex] = c;
-            bufferIndex++;
+            if (inputIndex >= INPUT_SIZE)
+            {
+                memmove(inputBuffer, inputBuffer + 1, INPUT_SIZE - 1);
+                inputIndex--;
+            }
+            inputBuffer[inputIndex++] = c;
         }
     }
 }
 
+void SerialManager::finalizeLine()
+{
+    inputBuffer[inputIndex] = '\0';
+
+    uint8_t len = inputIndex;
+
+    if (len >= DISPLAY_WIDTH)
+    {
+        memcpy(displayBuffer, inputBuffer + len - DISPLAY_WIDTH, DISPLAY_WIDTH);
+    }
+    else
+    {
+        uint8_t spaces = DISPLAY_WIDTH - len;
+        memset(displayBuffer, ' ', spaces);
+        memcpy(displayBuffer + spaces, inputBuffer, len);
+    }
+    displayBuffer[DISPLAY_WIDTH] = '\0';
+
+    inputIndex = 0;
+}
+
 String SerialManager::getLatestData()
 {
-    if (strlen(latestData) == 0)
+    if (displayBuffer[0] == '\0')
     {
         return String("  ----  ");
     }
-    return String(latestData);
+    return String(displayBuffer);
 }

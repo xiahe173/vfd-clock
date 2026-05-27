@@ -85,7 +85,12 @@ void loop()
     if (buttonHandler.wasShortPressed(0))
     {
         modeManager.nextMode();
-        
+
+        if (modeManager.getCurrentMode() == Mode::Serial)
+        {
+            serialManager.clear();
+        }
+
         String modeAlert;
         switch (modeManager.getCurrentMode())
         {
